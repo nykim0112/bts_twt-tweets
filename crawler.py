@@ -22,7 +22,9 @@ base_url = u'https://twitter.com/search?q='
 
 startdate = dt.date(year=2013, month=6, day=13)
 untildate = dt.date(year=2013, month=6, day=14)
-enddate = dt.date(year=2013, month=7, day=16)
+enddate = dt.date(year=2019, month=7, day=24)
+
+totalfreq=[]
 
 while not enddate == startdate:
     query = u'to%3Abts_twt%20filter%3Averified%20since%3A'+str(startdate)+'%20until%3A'+str(untildate)+'&src=typd'
@@ -33,13 +35,54 @@ while not enddate == startdate:
 
     lastHeight = browser.execute_script("return document.body.scrollHeight")
 
-body = browser.find_element_by_tag_name('body')
+    while True:
+            dailyfreq={'Date':startdate}
+            tweetbundle = {}
+            wordfreq=0
 
-for _ in range(1):
-    body.send_keys(Keys.PAGE_DOWN)
-    time.sleep(0.2)
+            tweets = soup.find_all("p", {"class": "TweetTextSize"})
+            # print(type(tweets))
+            # handles = soup.find_all("a", {"class": "account-group js-account-group js-action-profile js-user-profile-link js-nav"})
+            # print(len(handles))
 
-tweets = browser.find_elements_by_class_name('tweet-text')
+            wordfreq+=len(tweets)
 
-for tweet in tweets:
-    print(str(tweet.text))
+            browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            time.sleep(1)
+
+            newHeight = browser.execute_script("return document.body.scrollHeight")
+#            print(newHeight)
+            if newHeight != lastHeight:
+                html = browser.page_source
+                soup = BeautifulSoup(html,'html.parser')
+                tweets = soup.find_all("p", {"class": "TweetTextSize"})
+                # handles = soup.find_all("a", {"class": "account-group js-account-group js-action-profile js-user-profile-link js-nav"})
+                wordfreq=len(tweets)
+            else:
+                dailyfreq['Frequency']=wordfreq
+
+                # for i in range(len(handles)):
+                    # tweetbundle[handles[i]] = tweets[i]
+
+                # dailyfreq['Tweets'] = tweetbundle
+
+                wordfreq=0
+                totalfreq.append(dailyfreq)
+                startdate=untildate
+                untildate+=dt.timedelta(days=1)
+                dailyfreq={}
+                break
+    #         i+=1
+            lastHeight = newHeight
+
+# printing as a graph
+
+import pandas as pd
+df=pd.DataFrame(totalfreq)
+df.to_excel("bts_twt-tweets.xlsx")
+
+import matplotlib.pyplot as plt
+plt.figure(figsize=(20,10))
+plt.xticks(rotation=90)
+plt.plot(df.Date, df.Frequency, 'bo')
+plt.show()
