@@ -4,6 +4,8 @@
 Created on Sun Jul 14 23:24:55 2019
 
 @author: amykim
+@based on https://bit.ly/2Fztdhk
+
 """
 
 import requests
@@ -22,12 +24,13 @@ base_url = u'https://twitter.com/search?q='
 
 startdate = dt.date(year=2013, month=6, day=13)
 untildate = dt.date(year=2013, month=6, day=14)
-enddate = dt.date(year=2019, month=7, day=24)
+enddate = dt.date(year=2013, month=12, day=31)
 
 totalfreq=[]
 
 while not enddate == startdate:
-    query = u'to%3Abts_twt%20filter%3Averified%20since%3A'+str(startdate)+'%20until%3A'+str(untildate)+'&src=typd'
+    # query = u'to%3Abts_twt%20filter%3Averified%20since%3A'+str(startdate)+'%20until%3A'+str(untildate)+'&src=typd'
+    query = u'to%3Abts_twt%20since%3A'+str(startdate)+'%20until%3A'+str(untildate)+'&src=typd'
     url = base_url + query
     browser.get(url)
     html = browser.page_source
@@ -79,7 +82,8 @@ while not enddate == startdate:
 
 import pandas as pd
 df=pd.DataFrame(totalfreq)
-df.to_excel("bts_twt-tweets.xlsx")
+# df.to_excel("bts_twt-tweets.xlsx")
+df.to_excel("bts_twt-tweets-total.xlsx", sheet_name = '2013')
 
 import matplotlib.pyplot as plt
 plt.figure(figsize=(20,10))
